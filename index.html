@@ -14,15 +14,7 @@
 <body>
 <header class="top"><div class="wrap nav">
 <div class="menu-wrap logo-menu-wrap">
-<button class="brand brand-trigger" id="menuToggle" type="button" aria-label="Abrir acesso institucional" aria-controls="siteMenu" aria-expanded="false"><span class="crest">♞</span><span><strong>ANGOLA CHESS <i style="color:#d4af37;font-style:normal">LBA</i></strong><small>Base de Dados & Arquivo Nacional</small></span></button>
-<div class="menu-backdrop" id="menuBackdrop" hidden></div>
-<nav class="menu-dropdown logo-dropdown" id="siteMenu" aria-label="Acesso institucional" hidden>
-<div class="menu-group"><p class="menu-label">Acesso institucional</p><p class="menu-intro">Portais restritos · Ferramentas de gestão nacional e registo provincial.</p>
-<a class="menu-link" href="#provLogin"><span class="menu-icon">🏛️</span><span><strong>Associações Provinciais</strong><small>Inscrições e registo PGN · 21 províncias</small></span></a>
-<a class="menu-link admin" href="#adminLogin"><span class="menu-icon">🛡️</span><span><strong>Administração Nacional</strong><small>Controlo LBA e credenciais</small></span></a>
-</div>
-<div class="menu-group"><a class="menu-public" href="#rankings">Ir para o Portal Público (Rankings & Partidas)</a></div>
-</nav></div>
+<button class="brand brand-trigger" id="menuToggle" type="button" aria-label="Mostrar acesso institucional" aria-controls="portal" aria-expanded="false"><span class="crest">♞</span><span><strong>ANGOLA CHESS <i style="color:#d4af37;font-style:normal">LBA</i></strong><small>Base de Dados & Arquivo Nacional</small></span></button></div>
 <div class="institutional-seal"><span class="seal-dot"></span><span>Base Oficial · 21 Províncias</span></div>
 </div></header>
 <section class="hero"><div class="wrap"><span class="eyebrow"><i class="dot"></i> República de Angola · 21 Províncias</span><h1>O arquivo nacional do <span>xadrez angolano.</span></h1><p>Uma plataforma central para consultar rankings, descobrir jogadores, preservar partidas e acompanhar a actividade das associações provinciais. O xadrez angolano, organizado num só lugar.</p><div class="hero-actions"><a class="btn gold" href="#rankings">Explorar rankings →</a><a class="btn" href="#partidas">Pesquisar partidas ♟</a></div></div></section>
@@ -33,7 +25,7 @@
 <div class="panel hidden" id="searchPanel" data-section="arquivo"><div class="content-pad"><form id="gameSearch" class="searchrow"><input id="gameTerm" placeholder="Pesquisar jogador, código LBA, abertura ou ECO…"><button class="btn gold">Pesquisar partidas</button></form><div class="results" id="gameResults"><div class="empty">Introduza um termo ou pesquise todas as partidas arquivadas.</div></div></div></div>
 </section>
 <section class="section" id="provincias"><div class="section-head"><div><div class="kicker">Estrutura federativa</div><h2>As 21 províncias</h2><p class="muted">Rede nacional de associações provinciais.</p></div></div><div class="province-grid" id="provinceGrid"><div class="empty">A carregar associações…</div></div></section>
-<section class="section" id="portal"><div class="section-head"><div><div class="kicker">Acesso institucional</div><h2>Portais restritos</h2><p class="muted">Ferramentas de gestão nacional e registo provincial.</p></div></div>
+<section class="section hidden" id="portal" aria-hidden="true"><div class="section-head"><div><div class="kicker">Acesso institucional</div><h2>Portais restritos</h2><p class="muted">Ferramentas de gestão nacional e registo provincial.</p></div><button class="btn" id="portalClose" type="button" aria-label="Fechar acesso institucional">Fechar ✕</button></div>
 <div class="restricted">
 <div class="card"><h3>♜ Administração Nacional LBA</h3><p>Acesso reservado à administração nacional. Gere credenciais provinciais e acompanha os registos.</p><form id="adminLogin"><div class="field"><label>Email institucional</label><input id="adminEmail" type="email" autocomplete="username" required></div><div class="field" style="margin-top:10px"><label>Palavra-passe</label><input id="adminPassword" type="password" autocomplete="current-password" required></div><button class="btn red" style="margin-top:12px">Entrar na administração</button></form><div id="adminStatus" class="status"></div>
 <div id="adminTools" class="hidden"><hr style="border-color:#292930;margin:18px 0"><h3>Credenciais provinciais</h3><div class="field"><label>Província</label><select id="adminProvince"></select></div><div class="field" style="margin-top:10px"><label>Nova senha provincial</label><input id="newProvPassword" type="text" placeholder="Mínimo 12 caracteres"></div><button id="createProvPassword" class="btn gold" style="margin-top:10px">Definir senha provincial</button><button id="revokeProvPassword" class="btn" style="margin:10px 0 0 6px">Revogar acesso</button><div id="credentialStatus" class="status"></div></div>
@@ -69,12 +61,12 @@ $('provLogin').onsubmit=async e=>{e.preventDefault();status('provStatus','A aute
 $('provLogout').onclick=()=>{provToken=null;sessionStorage.removeItem('lba_prov_token');sessionStorage.removeItem('lba_prov_name');$('provTools').classList.add('hidden');status('provStatus','Sessão terminada.')};
 $('playerForm').onsubmit=async e=>{e.preventDefault();try{const d=await edge({acao:'inscrever_jogador',dados:{nome_completo:$('pName').value.trim(),data_nascimento:$('pDob').value,genero:$('pGender').value,clube:$('pClub').value,rating_classico:Number($('pClassic').value),rating_rapido:Number($('pRapid').value),rating_blitz:Number($('pBlitz').value)}},provToken);status('playerStatus','Atleta registado. Código LBA: '+(d.codigo_lba||d.jogador?.codigo_lba||'consultar administração'));e.target.reset()}catch(e){status('playerStatus',e.message,true)}};
 $('matchForm').onsubmit=async e=>{e.preventDefault();try{await edge({acao:'registar_partida',dados:{brancas_id:Number($('whiteId').value),negras_id:Number($('blackId').value),resultado:$('result').value,data_partida:$('matchDate').value,pgn_completo:$('pgn').value,lances_texto:$('pgn').value}},provToken);status('matchStatus','Partida registada com sucesso.');e.target.reset()}catch(e){status('matchStatus',e.message,true)}};
-const menuToggle=$('menuToggle'),siteMenu=$('siteMenu'),menuBackdrop=$('menuBackdrop');
-function closeMenu(){siteMenu.hidden=true;menuBackdrop.hidden=true;menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Abrir acesso institucional')}
-function toggleMenu(){const open=siteMenu.hidden;siteMenu.hidden=!open;menuBackdrop.hidden=!open;menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Fechar acesso institucional':'Abrir acesso institucional')}
-menuToggle.addEventListener('click',toggleMenu);menuBackdrop.addEventListener('click',closeMenu);
-siteMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(a.hasAttribute('data-open-search'))$('tabSearch').click();closeMenu()}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+const menuToggle=$('menuToggle'),portalSection=$('portal'),portalClose=$('portalClose');
+function fecharAcessoInstitucional(){portalSection.classList.add('hidden');portalSection.setAttribute('aria-hidden','true');menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Mostrar acesso institucional')}
+function alternarAcessoInstitucional(){const abrir=portalSection.classList.contains('hidden');if(abrir){portalSection.classList.remove('hidden');portalSection.setAttribute('aria-hidden','false');menuToggle.setAttribute('aria-expanded','true');menuToggle.setAttribute('aria-label','Ocultar acesso institucional');requestAnimationFrame(()=>portalSection.scrollIntoView({behavior:'smooth',block:'start'}));}else{fecharAcessoInstitucional();menuToggle.focus();}}
+menuToggle.addEventListener('click',alternarAcessoInstitucional);
+portalClose.addEventListener('click',()=>{fecharAcessoInstitucional();menuToggle.focus();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!portalSection.classList.contains('hidden')){fecharAcessoInstitucional();menuToggle.focus();}});
 $('year').textContent=new Date().getFullYear();
 (async()=>{try{await loadProvinces();await Promise.all([loadStats(),loadRanking()])}catch(e){console.error(e);$('rankingRows').innerHTML='<tr><td colspan="7" class="empty">Falha ao carregar dados: '+safe(e.message)+'</td></tr>'}const token=sessionStorage.getItem('lba_prov_token');if(token){provToken=token;provName=sessionStorage.getItem('lba_prov_name')||'Associação Provincial';$('provTools').classList.remove('hidden');$('provTitle').textContent='Painel · '+provName}})();
 </script></body></html>
